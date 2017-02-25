@@ -13,7 +13,6 @@ public class Endpoint {
     private int numberOfCacheServers;
     private TreeMap<Integer, Integer> latencyOfCacheServers;
     private TreeMap<Integer, Integer> videoRequests;
-    private TreeMap<Integer, TreeMap<Integer, Integer>> scoresForEachCacheServer;
     private TreeMap<Integer, Integer> videoServedBy;
 
     public Endpoint(int id) {
@@ -21,22 +20,7 @@ public class Endpoint {
 
         latencyOfCacheServers = new TreeMap<>();
         videoRequests = new TreeMap<>();
-        scoresForEachCacheServer = new TreeMap<>();
         videoServedBy = new TreeMap<>();
-    }
-
-    public void calculateScores() {
-        for (int cacheId: latencyOfCacheServers.keySet()) {
-            TreeMap<Integer, Integer> videoScores = new TreeMap<>();
-            int cacheLatency = latencyOfCacheServers.get(cacheId);
-
-            for (int videoId: videoRequests.keySet()) {
-                int requestsNum = videoRequests.get(videoId);
-                videoScores.put(videoId, calculateScore(cacheLatency, requestsNum));
-            }
-
-            scoresForEachCacheServer.put(cacheId, videoScores);
-        }
     }
 
     public int calculateScore(int cacheLatency, int requestsNum) {
@@ -76,7 +60,16 @@ public class Endpoint {
     }
 
     public TreeMap<Integer, Integer> getScoresForCacheServer(int cacheId) {
-        return scoresForEachCacheServer.get(cacheId);
+//        return scoresForEachCacheServer.get(cacheId);
+        TreeMap<Integer, Integer> videoScores = new TreeMap<>();
+        int cacheLatency = latencyOfCacheServers.get(cacheId);
+
+        for (int videoId: videoRequests.keySet()) {
+            int requestsNum = videoRequests.get(videoId);
+            videoScores.put(videoId, calculateScore(cacheLatency, requestsNum));
+        }
+
+        return videoScores;
     }
 
     public int getVideoScoreForCacheServer(int videoId, int cacheId) {
@@ -86,7 +79,10 @@ public class Endpoint {
                 return 0;
         }
 
-        return scoresForEachCacheServer.get(cacheId).get(videoId);
+//        return scoresForEachCacheServer.get(cacheId).get(videoId);
+        int cacheLatency = latencyOfCacheServers.get(cacheId);
+        int requestsNum = videoRequests.get(videoId);
+        return calculateScore(cacheLatency, requestsNum);
     }
 
     public Set<Integer> getRequestedVideosIds() {

@@ -38,16 +38,12 @@ public class HashCode {
             cacheServers.add(cacheServer);
         }
 
-        // calculate scores
-        for (Endpoint endpoint: endpoints)
-            endpoint.calculateScores();
-
         sortCacheServers();
 
         // knapsack for each server
         for (CacheServer cacheServer: cacheServers) {
             System.out.format("knapsack for #%d\n", cacheServer.getId());
-            cacheServer.knapsack(KnapsackType.BnB);
+            cacheServer.knapsack(KnapsackType.Dynamic);
         }
 
         writeOutput(inputFilename + ".output.txt");
