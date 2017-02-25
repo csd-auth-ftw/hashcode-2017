@@ -1,8 +1,11 @@
-import io.InputReader;
-import io.OutputWriter;
-import knapsack.KnapsackType;
+package three.hundred.billion;
+
+import three.hundred.billion.io.InputReader;
+import three.hundred.billion.io.OutputWriter;
+import three.hundred.billion.knapsack.KnapsackType;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 /**
  * Created by nikos on 24/2/2017.
@@ -26,7 +29,7 @@ public class HashCode {
         endpoints = new ArrayList<Endpoint>();
         cacheServers = new ArrayList<CacheServer>();
 
-        String inputFilename = appendDesktopPath("\\hashcode\\trending_today.in");
+        String inputFilename = appendDesktopPath("\\hashcode\\kittens.in");
         readInput(inputFilename);
 
         // init cache servers
@@ -39,12 +42,29 @@ public class HashCode {
         for (Endpoint endpoint: endpoints)
             endpoint.calculateScores();
 
+        sortCacheServers();
+
         // knapsack for each server
         for (CacheServer cacheServer: cacheServers) {
-            cacheServer.knapsack(KnapsackType.Dynamic);
+            System.out.format("knapsack for #%d\n", cacheServer.getId());
+            cacheServer.knapsack(KnapsackType.BnB);
         }
 
         writeOutput(inputFilename + ".output.txt");
+    }
+
+    private void sortCacheServers() {
+        cacheServers.sort(new Comparator<CacheServer>() {
+            public int compare(CacheServer o1, CacheServer o2) {
+                if (o1.getEndpointConnNumber() < o2.getEndpointConnNumber()) {
+                    return 1;
+                } else if (o1.getEndpointConnNumber() > o2.getEndpointConnNumber()) {
+                    return -1;
+                } else {
+                    return 0;
+                }
+            }
+        });
     }
 
     private String appendDesktopPath(String filename) {

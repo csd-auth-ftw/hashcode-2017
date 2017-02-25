@@ -1,7 +1,10 @@
-import knapsack.*;
+package three.hundred.billion;
+
+import three.hundred.billion.knapsack.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -29,22 +32,23 @@ public class CacheServer {
 
     public CacheServer(int id) {
         this.id = id;
-        endpointConnections = new ArrayList<Endpoint>();
-        videoScores = new TreeMap<Integer, Integer>();
+        endpointConnections = new ArrayList<>();
+        videoScores = new TreeMap<>();
     }
 
     public List<Item> knapsack(KnapsackType type) {
+        videoScores = new TreeMap<>();
         for (Endpoint endpoint: endpointConnections) {
-            TreeMap<Integer, Integer> scores = endpoint.getScoresForCacheServer(id);
-            for (int videoId: scores.keySet()) {
+            Set<Integer> videoIds = endpoint.getRequestedVideosIds();
+            for (int videoId: videoIds) {
                 if (!videoScores.containsKey(videoId))
                     videoScores.put(videoId, 0);
 
-                videoScores.put(videoId, videoScores.get(videoId) + scores.get(videoId));
+                videoScores.put(videoId, videoScores.get(videoId) + endpoint.getVideoScoreForCacheServer(videoId, id));
             }
         }
 
-        ArrayList<Item> items = new ArrayList<Item>();
+        ArrayList<Item> items = new ArrayList<>();
         for (int videoId: videoScores.keySet()) {
             Item item = new Item();
             item.label = videoId;
@@ -66,7 +70,15 @@ public class CacheServer {
         KnapsackSolution solution = knapsackSolver.solve();
         knapsackItems = solution.items;
 
+        // update endpoints
+        for (Endpoint endpoint: endpointConnections)
+            endpoint.updateVideoSources(knapsackItems, id);
+
         return knapsackItems;
+    }
+
+    public int getEndpointConnNumber() {
+        return endpointConnections.size();
     }
 
     public void addEndpointConnection(Endpoint endpoint) {

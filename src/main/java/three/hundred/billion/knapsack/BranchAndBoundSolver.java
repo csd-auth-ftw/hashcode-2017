@@ -1,4 +1,12 @@
-package knapsack;
+/**
+ * patrickherrmann/Knapsack
+ * ------------------------
+ * 4 implementations of the 0-1 three.hundrer.billion.knapsack problem and a comparison of their effectiveness
+ *
+ * https://github.com/patrickherrmann/Knapsack
+ *
+ */
+package three.hundred.billion.knapsack;
 
 import java.util.*;
 

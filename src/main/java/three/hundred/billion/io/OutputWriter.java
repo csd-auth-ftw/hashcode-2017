@@ -1,6 +1,6 @@
-package io;
+package three.hundred.billion.io;
 
-import knapsack.Item;
+import three.hundred.billion.knapsack.Item;
 
 import java.io.*;
 import java.util.List;

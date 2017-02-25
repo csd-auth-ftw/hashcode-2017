@@ -1,4 +1,8 @@
-import java.util.TreeMap;
+package three.hundred.billion;
+
+import three.hundred.billion.knapsack.Item;
+
+import java.util.*;
 
 /**
  * Created by nikos on 24/2/2017.
@@ -10,18 +14,20 @@ public class Endpoint {
     private TreeMap<Integer, Integer> latencyOfCacheServers;
     private TreeMap<Integer, Integer> videoRequests;
     private TreeMap<Integer, TreeMap<Integer, Integer>> scoresForEachCacheServer;
+    private TreeMap<Integer, Integer> videoServedBy;
 
     public Endpoint(int id) {
         this.id = id;
 
-        latencyOfCacheServers = new TreeMap<Integer, Integer>();
-        videoRequests = new TreeMap<Integer, Integer>();
-        scoresForEachCacheServer = new TreeMap<Integer, TreeMap<Integer, Integer>>();
+        latencyOfCacheServers = new TreeMap<>();
+        videoRequests = new TreeMap<>();
+        scoresForEachCacheServer = new TreeMap<>();
+        videoServedBy = new TreeMap<>();
     }
 
     public void calculateScores() {
         for (int cacheId: latencyOfCacheServers.keySet()) {
-            TreeMap<Integer, Integer> videoScores = new TreeMap<Integer, Integer>();
+            TreeMap<Integer, Integer> videoScores = new TreeMap<>();
             int cacheLatency = latencyOfCacheServers.get(cacheId);
 
             for (int videoId: videoRequests.keySet()) {
@@ -73,6 +79,20 @@ public class Endpoint {
         return scoresForEachCacheServer.get(cacheId);
     }
 
+    public int getVideoScoreForCacheServer(int videoId, int cacheId) {
+        // check if already served by another server
+        if (videoServedBy.containsKey(videoId)) {
+            if (videoServedBy.get(videoId) != cacheId)
+                return 0;
+        }
+
+        return scoresForEachCacheServer.get(cacheId).get(videoId);
+    }
+
+    public Set<Integer> getRequestedVideosIds() {
+        return videoRequests.keySet();
+    }
+
     @Override
     public String toString() {
         StringBuilder str = new StringBuilder();
@@ -82,4 +102,30 @@ public class Endpoint {
 
         return str.toString();
     }
+
+    public void updateVideoSources(List<Item> knapsackItems, int cacheId) {
+        for (Item item: knapsackItems) {
+            int videoId = item.label;
+
+            if (videoRequests.containsKey(videoId))
+                if (!videoServedBy.containsKey(videoId))
+                    videoServedBy.put(videoId, cacheId);
+        }
+    }
+
+    public ArrayList<Integer> getNotServedVideosIds() {
+        ArrayList<Integer> videoIds = new ArrayList<>();
+        for (int videoId: videoRequests.keySet()) {
+            if (!videoServedBy.containsKey(videoId))
+                videoIds.add(videoId);
+        }
+
+        return videoIds;
+    }
+
+//    public TreeMap<Integer, Integer> getNotServedVideosScores() {
+//        for (int videoId: videoRequests.keySet()) {
+//
+//        }
+//    }
 }
